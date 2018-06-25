@@ -7,6 +7,7 @@ package akka.io
 import java.net.DatagramSocket
 import java.net.InetSocketAddress
 import com.typesafe.config.Config
+import scala.collection.compat._
 import scala.collection.immutable
 import akka.io.Inet.{ SoJavaFactories, SocketOption }
 import akka.util.Helpers.Requiring
@@ -280,7 +281,7 @@ object UdpMessage {
    * message, or the manager will reply with a [[Udp.CommandFailed]] message.
    */
   def bind(handler: ActorRef, endpoint: InetSocketAddress, options: JIterable[SocketOption]): Command =
-    Bind(handler, endpoint, options.asScala.to)
+    Bind(handler, endpoint, options.asScala.to(immutable.Traversable))
   /**
    * Bind without specifying options.
    */
@@ -303,7 +304,9 @@ object UdpMessage {
    * The “simple sender” will not stop itself, you will have to send it a [[akka.actor.PoisonPill]]
    * when you want to close the socket.
    */
-  def simpleSender(options: JIterable[SocketOption]): Command = SimpleSender(options.asScala.to)
+  def simpleSender(options: JIterable[SocketOption]): Command =
+    SimpleSender(options.asScala.to(immutable.Traversable))
+
   /**
    * Retrieve a simple sender without specifying options.
    */

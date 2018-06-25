@@ -347,9 +347,9 @@ private[remote] class ArteryAeronUdpTransport(_system: ExtendedActorSystem, _pro
 
         val lane = inboundSink(envelopeBufferPool)
         val completedValues: Vector[Future[Done]] =
-          (0 until inboundLanes).map { _ ⇒
+          (0 until inboundLanes).iterator.map { _ ⇒
             laneHub.toMat(lane)(Keep.right).run()(materializer)
-          }(collection.breakOut)
+          }.to(Vector)
 
         import system.dispatcher
 

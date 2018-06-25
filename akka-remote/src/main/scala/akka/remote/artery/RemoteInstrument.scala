@@ -296,6 +296,6 @@ private[remote] object RemoteInstruments {
         .dynamicAccess.createInstanceFor[RemoteInstrument](fqcn, Nil)
         .orElse(system.dynamicAccess.createInstanceFor[RemoteInstrument](fqcn, List(classOf[ExtendedActorSystem] → system)))
         .get
-    }(collection.breakOut)
+    }.to(Vector)
   }
 }

@@ -164,8 +164,8 @@ private[akka] final class DaemonMsgCreateSerializer(val system: ExtendedActorSys
         } else {
           // message from an older node, which only provides data and class name
           // and never any serializer ids
-          (proto.getProps.getArgsList.asScala zip proto.getProps.getManifestsList.asScala)
-            .map(oldDeserialize)(collection.breakOut)
+          (proto.getProps.getArgsList.asScala.iterator zip proto.getProps.getManifestsList.asScala.iterator)
+            .map(oldDeserialize).to(Vector)
         }
       Props(deploy(proto.getProps.getDeploy), actorClass, args)
     }

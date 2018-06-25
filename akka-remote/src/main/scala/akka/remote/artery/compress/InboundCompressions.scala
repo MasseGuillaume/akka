@@ -147,7 +147,8 @@ private[remote] final class InboundCompressionsImpl(
     import scala.collection.JavaConverters._
     // can't use union because of java.lang.Long and Scala Long mismatch,
     // only used for testing so doesn't matter
-    val result = Set.empty[java.lang.Long] ++ _actorRefsIns.keySet.asScala.iterator ++
+    val result = Set.empty[java.lang.Long] ++
+      _actorRefsIns.keySet.asScala.iterator ++
       _classManifestsIns.keySet.asScala.iterator
     result.map(_.longValue)
   }

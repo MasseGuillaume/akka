@@ -8,7 +8,7 @@ libraryDependencies += "org.kohsuke" % "github-api" % "1.68"
 addSbtPlugin("com.typesafe.sbt" % "sbt-multi-jvm" % "0.4.0")
 //#sbt-multi-jvm
 
-addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.8.1")
+// addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.8.1")
 addSbtPlugin("com.typesafe.sbt" % "sbt-osgi" % "0.9.3")
 addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "0.2.0")
 addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.1.0-M1")
@@ -23,6 +23,7 @@ addSbtPlugin("com.lightbend" % "sbt-whitesource" % "0.1.12")
 addSbtPlugin("com.typesafe.sbt" % "sbt-git" % "0.9.3")
 addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.9.0") // for advanced PR validation features
 addSbtPlugin("de.heikoseeberger" % "sbt-header" % "5.0.0") // for maintenance of copyright file header
+addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.6.0-M9")
 
 // used for @unidoc directive
 libraryDependencies += "io.github.lukehutch" % "fast-classpath-scanner" % "2.12.3"

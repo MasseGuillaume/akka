@@ -15,21 +15,31 @@ object Dependencies {
   lazy val scalaCheckVersion = settingKey[String]("The version of ScalaCheck to use.")
   lazy val java8CompatVersion = settingKey[String]("The version of scala-java8-compat to use.")
   val junitVersion = "4.12"
-  val sslConfigVersion = "0.2.3"
+  val sslConfigVersion = "0.2.4"
   val slf4jVersion = "1.7.25"
-  val scalaXmlVersion = "1.0.6"
+  val scalaXmlVersion = "1.1.0"
   val aeronVersion = "1.9.1"
 
   val Versions = Seq(
-    crossScalaVersions := Seq("2.11.12", "2.12.6"),
+    crossScalaVersions := Seq("2.13.0-M4"),
     scalaVersion := System.getProperty("akka.build.scalaVersion", crossScalaVersions.value.head),
-    scalaStmVersion := sys.props.get("akka.build.scalaStmVersion").getOrElse("0.8"),
+
+    // git clone git@github.com:MasseGuillaume/scala-stm.git
+    // cd scala-stm
+    // git checkout 2.13.0-M4
+    // sbt "+ publishLocal"
+    scalaStmVersion := sys.props.get("akka.build.scalaStmVersion").getOrElse("0.9.0+2.13.0-M4"),
     scalaCheckVersion := sys.props.get("akka.build.scalaCheckVersion").getOrElse(
       CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, n)) if n >= 12 ⇒ "1.13.5" // does not work for 2.11
-        case _                       ⇒ "1.13.2"
+        case Some((2, n)) if n >= 12 ⇒ "1.14.0"
+        case _                       ⇒ "1.13.2" // anything later does not work for 2.11
       }),
-    scalaTestVersion := "3.0.4",
+    scalaTestVersion := {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, n)) if n >= 13 => "3.0.6-SNAP1"
+        case _ => "3.0.4"
+      }
+    },
     java8CompatVersion := {
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, n)) if n >= 13 ⇒ "0.9.0"
@@ -76,8 +86,20 @@ object Dependencies {
 
     val aeronDriver = "io.aeron" % "aeron-driver" % aeronVersion // ApacheV2
     val aeronClient = "io.aeron" % "aeron-client" % aeronVersion // ApacheV2
+
+    
+    // git clone git@github.com:MasseGuillaume/scala-collection-compat.git
+    // cd scala-collection-compat
+    // git checkout proxy
+    // sbt "+ publishLocal"
+    val collectionCompat = "org.scala-lang.modules" %% "scala-collection-compat" % "0.2.1+proxy" // BSD New
+
     object Docs {
-      val sprayJson = "io.spray" %% "spray-json" % "1.3.3" % "test"
+      // git clone git@github.com:xuwei-k/spray-json.git
+      // cd spray-json
+      // git checkout Scala-2.13.0-M4
+      // sbt +publishLocal
+      val sprayJson = "io.spray" %% "spray-json" % "1.3.4" % "test"
       val gson = "com.google.code.gson" % "gson" % "2.8.2" % "test"
     }
 
@@ -132,7 +154,7 @@ object Dependencies {
   // TODO check if `l ++=` everywhere expensive?
   val l = libraryDependencies
 
-  val actor = l ++= Seq(config, java8Compat.value)
+  val actor = l ++= Seq(config, collectionCompat, java8Compat.value)
 
   val testkit = l ++= Seq(Test.junit, Test.scalatest.value) ++ Test.metricsAll
 

@@ -24,6 +24,7 @@ import org.reactivestreams.{ Publisher, Subscriber }
 import scala.annotation.unchecked.uncheckedVariance
 import scala.collection.generic.CanBuildFrom
 import scala.collection.immutable
+import scala.collection.Factory
 import scala.compat.java8.FutureConverters._
 import scala.compat.java8.OptionConverters._
 import scala.concurrent.{ Future, Promise }
@@ -259,7 +260,7 @@ import scala.util.{ Failure, Success, Try }
 /**
  * INTERNAL API
  */
-@InternalApi private[akka] final class SeqStage[T, That](implicit cbf: CanBuildFrom[Nothing, T, That with immutable.Traversable[_]]) extends GraphStageWithMaterializedValue[SinkShape[T], Future[That]] {
+@InternalApi private[akka] final class SeqStage[T, That](implicit factory: Factory[T, That with immutable.Traversable[_]]) extends GraphStageWithMaterializedValue[SinkShape[T], Future[That]] {
   val in = Inlet[T]("seq.in")
 
   override def toString: String = "SeqStage"
@@ -271,7 +272,7 @@ import scala.util.{ Failure, Success, Try }
   override def createLogicAndMaterializedValue(inheritedAttributes: Attributes) = {
     val p: Promise[That] = Promise()
     val logic = new GraphStageLogic(shape) with InHandler {
-      val buf = cbf()
+      val buf = factory.newBuilder
 
       override def preStart(): Unit = pull(in)
 
@@ -389,7 +390,10 @@ import scala.util.{ Failure, Success, Try }
       override def pull(): Future[Option[T]] = {
         val p = Promise[Option[T]]
         callback.invokeWithFeedback(Pull(p))
-          .onFailure { case NonFatal(e) ⇒ p.tryFailure(e) }(akka.dispatch.ExecutionContexts.sameThreadExecutionContext)
+          .onComplete {
+            case util.Failure(NonFatal(e)) ⇒ p.tryFailure(e)
+            case _                         ⇒ ()
+          }(akka.dispatch.ExecutionContexts.sameThreadExecutionContext)
         p.future
       }
       override def cancel(): Unit = {

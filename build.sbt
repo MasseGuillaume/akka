@@ -190,7 +190,7 @@ lazy val distributedData = akkaModule("akka-distributed-data")
 
 lazy val docs = akkaModule("akka-docs")
   .dependsOn(
-    actor, cluster, clusterMetrics, slf4j, agent, camel, osgi, persistenceTck, persistenceQuery, distributedData, stream,
+    actor, cluster, clusterMetrics, slf4j, /*agent,*/ camel, osgi, persistenceTck, persistenceQuery, distributedData, stream,
     clusterTools % "compile->compile;test->test",
     clusterSharding % "compile->compile;test->test",
     testkit % "compile->compile;test->test",
@@ -476,6 +476,6 @@ def akkaModule(name: String): Project =
   Project(id = name, base = file(name))
     .settings(akka.AkkaBuild.buildSettings)
     .settings(akka.AkkaBuild.defaultSettings)
-    .settings(akka.Formatting.formatSettings)
+    // .settings(akka.Formatting.formatSettings)
     .enablePlugins(BootstrapGenjavadoc)
 

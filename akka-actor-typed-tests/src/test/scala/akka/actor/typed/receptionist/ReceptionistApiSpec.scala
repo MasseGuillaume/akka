@@ -41,9 +41,10 @@ object ReceptionistApiSpec {
     // one-off ask outside of actor, should be uncommon but not rare
     val found: Future[Receptionist.Listing] =
       system.receptionist ? (Receptionist.Find(key, _))
-    found.onSuccess {
-      case key.Listing(instances) ⇒
+    found.onComplete {
+      case scala.util.Success(key.Listing(instances)) ⇒
         instances.foreach(_ ! "woho")
+      case _ ⇒ ()
     }
 
     Behaviors.setup[Any] { ctx ⇒

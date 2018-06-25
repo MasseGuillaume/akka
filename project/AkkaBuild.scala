@@ -25,7 +25,7 @@ object AkkaBuild {
 
   lazy val rootSettings = Release.settings ++
     UnidocRoot.akkaSettings ++
-    Formatting.formatSettings ++
+    // Formatting.formatSettings ++
     Protobuf.settings ++ Seq(
       parallelExecution in GlobalScope := System.getProperty("akka.parallelExecution", parallelExecutionByDefault.toString).toBoolean,
       version in ThisBuild := "2.5-SNAPSHOT"
@@ -89,20 +89,23 @@ object AkkaBuild {
   final val DefaultJavacOptions = Seq("-encoding", "UTF-8", "-Xlint:unchecked", "-XDignore.symbol.file")
 
   lazy val defaultSettings = resolverSettings ++
+    Hack.ignoreWarnings ++
     TestExtras.Filter.settings ++
     Protobuf.settings ++ Seq[Setting[_]](
+      unmanagedSourceDirectories in Compile += {
+        val sourceDir = (sourceDirectory in Compile).value
+        CrossVersion.partialVersion(scalaVersion.value) match {
+          case Some((2, n)) if n >= 13 => sourceDir / "scala-2.13+"
+          case _                       => sourceDir / "scala-2.13-"
+        }
+      },
       // compile options
-      scalacOptions in Compile ++= DefaultScalacOptions,
-      // Makes sure that, even when compiling with a jdk version greater than 8, the resulting jar will not refer to
-      // methods not found in jdk8. To test whether this has the desired effect, compile akka-remote and check the
-      // invocation of 'ByteBuffer.clear()' in EnvelopeBuffer.class with 'javap -c': it should refer to
-      // "java/nio/ByteBuffer.clear:()Ljava/nio/Buffer" and not "java/nio/ByteBuffer.clear:()Ljava/nio/ByteBuffer":
-      scalacOptions in Compile ++= (if (scalaBinaryVersion.value == "2.11" || System.getProperty("java.version").startsWith("1.")) Seq("-target:jvm-1.8", "-javabootclasspath", CrossJava.Keys.fullJavaHomes.value("8") + "/jre/lib/rt.jar") else Seq("-release", "8")),
+      scalacOptions in Compile ++= Seq("-encoding", "UTF-8", "-target:jvm-1.8", "-feature", "-unchecked", "-Xlog-reflective-calls"),
       scalacOptions in Compile ++= (if (allWarnings) Seq("-deprecation") else Nil),
       scalacOptions in Test := (scalacOptions in Test).value.filterNot(opt ⇒
         opt == "-Xlog-reflective-calls" || opt.contains("genjavadoc")),
-      javacOptions in compile ++= DefaultJavacOptions ++ Seq("-source", "8", "-target", "8", "-bootclasspath", CrossJava.Keys.fullJavaHomes.value("8") + "/jre/lib/rt.jar"),
-      javacOptions in test ++= DefaultJavacOptions ++ Seq("-source", "8", "-target", "8", "-bootclasspath", CrossJava.Keys.fullJavaHomes.value("8") + "/jre/lib/rt.jar"),
+      javacOptions in compile ++= DefaultJavacOptions, //++ Seq("-source", "8", "-target", "8", "-bootclasspath", CrossJava.Keys.fullJavaHomes.value("8") + "/jre/lib/rt.jar"),
+      javacOptions in test ++= DefaultJavacOptions, //++ Seq("-source", "8", "-target", "8", "-bootclasspath", CrossJava.Keys.fullJavaHomes.value("8") + "/jre/lib/rt.jar"),
       javacOptions in compile ++= (if (allWarnings) Seq("-Xlint:deprecation") else Nil),
       javacOptions in doc ++= Seq(),
 

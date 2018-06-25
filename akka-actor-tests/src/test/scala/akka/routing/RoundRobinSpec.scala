@@ -65,7 +65,7 @@ class RoundRobinSpec extends AkkaSpec with DefaultTimeout with ImplicitSender {
 
       for (_ ← 1 to iterationCount; _ ← 1 to connectionCount) {
         val id = Await.result((actor ? "hit").mapTo[Int], timeout.duration)
-        replies = replies + (id → (replies(id) + 1))
+        replies = (replies + (id → (replies(id) + 1))).withDefaultValue(0) // https://github.com/scala/bug/issues/11017
       }
 
       counter.get should ===(connectionCount)

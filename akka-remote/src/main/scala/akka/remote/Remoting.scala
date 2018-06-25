@@ -587,7 +587,7 @@ private[remote] class EndpointManager(conf: Config, log: LoggingAdapter) extends
   val accepting: Receive = {
     case ManagementCommand(cmd) ⇒
       val allStatuses: immutable.Seq[Future[Boolean]] =
-        transportMapping.values.map(transport ⇒ transport.managementCommand(cmd))(scala.collection.breakOut)
+        transportMapping.values.iterator.map(transport ⇒ transport.managementCommand(cmd)).to(Seq)
       akka.compat.Future.fold(allStatuses)(true)(_ && _) map ManagementCommandAck pipeTo sender()
 
     case Quarantine(address, uidToQuarantineOption) ⇒

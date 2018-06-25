@@ -760,9 +760,9 @@ private[remote] class Association(
         .toMat(transport.outboundTransportSink(this))(Keep.both).run()(materializer)
 
       val values: Vector[(SendQueue.QueueValue[OutboundEnvelope], Encoder.OutboundCompressionAccess, Future[Done])] =
-        (0 until outboundLanes).map { _ ⇒
+        (0 until outboundLanes).iterator.map { _ ⇒
           lane.to(mergeHub).run()(materializer)
-        }(collection.breakOut)
+        }.to(Vector)
 
       val (queueValues, compressionAccessValues, laneCompletedValues) = values.unzip3
 

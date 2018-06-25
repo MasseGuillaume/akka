@@ -79,7 +79,7 @@ class SslTransportException(message: String, cause: Throwable) extends RuntimeEx
   val SSLKeyStorePassword: String = config.getString("key-store-password")
   val SSLKeyPassword: String = config.getString("key-password")
   val SSLTrustStorePassword: String = config.getString("trust-store-password")
-  val SSLEnabledAlgorithms: Set[String] = immutableSeq(config.getStringList("enabled-algorithms")).to[Set]
+  val SSLEnabledAlgorithms: Set[String] = immutableSeq(config.getStringList("enabled-algorithms")).to(Set)
   val SSLProtocol: String = config.getString("protocol")
   val SSLRandomNumberGenerator: String = config.getString("random-number-generator")
   val SSLRequireMutualAuthentication: Boolean = config.getBoolean("require-mutual-authentication")

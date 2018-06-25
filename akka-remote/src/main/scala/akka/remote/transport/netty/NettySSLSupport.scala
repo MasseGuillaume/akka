@@ -27,7 +27,7 @@ private[akka] class SSLSettings(config: Config) {
 
   val SSLTrustStorePassword = getString("trust-store-password")
 
-  val SSLEnabledAlgorithms = immutableSeq(getStringList("enabled-algorithms")).to[Set]
+  val SSLEnabledAlgorithms = immutableSeq(getStringList("enabled-algorithms")).to(Set)
 
   val SSLProtocol = getString("protocol")
 

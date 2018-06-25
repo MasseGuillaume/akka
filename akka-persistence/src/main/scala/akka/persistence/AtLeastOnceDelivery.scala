@@ -4,7 +4,8 @@
 
 package akka.persistence
 
-import scala.collection.breakOut
+import scala.collection.compat._
+
 import scala.collection.immutable
 import scala.concurrent.duration.FiniteDuration
 import akka.actor.{ ActorPath, ActorSelection, NotInfluenceReceiveTimeout }
@@ -332,7 +333,7 @@ trait AtLeastOnceDeliveryLike extends Eventsourced {
   def getDeliverySnapshot: AtLeastOnceDeliverySnapshot =
     AtLeastOnceDeliverySnapshot(
       deliverySequenceNr,
-      unconfirmed.map { case (deliveryId, d) ⇒ UnconfirmedDelivery(deliveryId, d.destination, d.message) }(breakOut))
+      unconfirmed.iterator.map { case (deliveryId, d) ⇒ UnconfirmedDelivery(deliveryId, d.destination, d.message) }.to(immutable.Seq))
 
   /**
    * If snapshot from [[#getDeliverySnapshot]] was saved it will be received during recovery
@@ -341,8 +342,8 @@ trait AtLeastOnceDeliveryLike extends Eventsourced {
   def setDeliverySnapshot(snapshot: AtLeastOnceDeliverySnapshot): Unit = {
     deliverySequenceNr = snapshot.currentDeliveryId
     val now = System.nanoTime()
-    unconfirmed = snapshot.unconfirmedDeliveries.map(d ⇒
-      d.deliveryId → Delivery(d.destination, d.message, now, 0))(breakOut)
+    unconfirmed = snapshot.unconfirmedDeliveries.iterator.map(d ⇒
+      d.deliveryId → Delivery(d.destination, d.message, now, 0)).to(immutable.SortedMap)
   }
 
   /**
