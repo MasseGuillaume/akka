@@ -22,13 +22,13 @@ resolverSettings
 
 lazy val aggregatedProjects: Seq[ProjectReference] = Seq(
   actor, actorTests,
-  //agent,
+  agent,
   benchJmh,
   camel,
   cluster, clusterMetrics, clusterSharding, clusterTools,
   contrib,
   distributedData,
-  //docs,
+  docs,
   multiNodeTestkit,
   osgi,
   persistence, persistenceQuery, persistenceShared, persistenceTck,

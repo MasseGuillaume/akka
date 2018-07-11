@@ -40,7 +40,7 @@ object ByteIterator {
 
     def clear(): Unit = { this.array = Array.emptyByteArray; from = 0; until = from }
 
-    final override def length: Int = { val l = len; clear(); l }
+    final override def size: Int = { val l = len; clear(); l }
 
     final override def ++(that: TraversableOnce[Byte]): ByteIterator = that match {
       case that: ByteIterator ⇒
@@ -89,7 +89,8 @@ object ByteIterator {
       this
     }
 
-    final override def copyToArray[B >: Byte](xs: Array[B], start: Int, len: Int): Unit = {
+    // override
+    final def copyToArray[B >: Byte](xs: Array[B], start: Int, len: Int): Unit = {
       val n = 0 max ((xs.length - start) min this.len min len)
       Array.copy(this.array, from, xs, start, n)
       this.drop(n)
@@ -283,7 +284,8 @@ object ByteIterator {
         if (dropMore) dropWhile(p) else this
       } else this
 
-    final override def copyToArray[B >: Byte](xs: Array[B], start: Int, len: Int): Unit = {
+    // override
+    final def copyToArray[B >: Byte](xs: Array[B], start: Int, len: Int): Unit = {
       var pos = start
       var rest = len
       while ((rest > 0) && !iterators.isEmpty) {

@@ -83,11 +83,72 @@ object AkkaBuild {
 
   private def allWarnings: Boolean = System.getProperty("akka.allwarnings", "false").toBoolean
 
+  import sbt._
+  import Keys._
+  import KeyRanks.DTask
+  import xsbti.{Reporter, Problem, Position, Severity}
+
+  private lazy val compilerReporter = TaskKey[xsbti.Reporter](
+    "compilerReporter",
+    "Experimental hook to listen (or send) compilation failure messages.",
+    DTask
+  )
+
+  val ignoreWarnings = Seq(
+    compilerReporter in (Compile, compile) :=
+      new xsbti.Reporter {
+        private val buffer = collection.mutable.ArrayBuffer.empty[Problem]
+        def reset(): Unit = buffer.clear()
+        def hasErrors: Boolean = buffer.exists(_.severity == Severity.Error)
+        def hasWarnings: Boolean = buffer.exists(_.severity == Severity.Warn)
+        def printSummary(): Unit = {
+          
+          if (problems.nonEmpty) {
+            print("\033c")
+            problems.foreach{ p =>
+              println("=====================================================")
+              println(p.position)
+              println(p.message)
+              println()
+              println()
+            }
+          }
+        }
+        def problems: Array[Problem] = buffer.toArray
+
+        def log(problem: Problem): Unit = {
+          if (problem.severity == Severity.Error) {
+            buffer.append(problem)
+          }
+        }
+        def log(pos: Position, msg: String, sev: Severity): Unit = {
+          object MyProblem extends Problem {
+            def category: String = "foo"
+            def severity: Severity = sev
+            def message: String = msg
+            def position: Position = pos
+            override def toString = s"$position \n$message"
+          }
+          log(MyProblem)
+        }
+        def comment(pos: xsbti.Position, msg: String): Unit = ()
+      }
+  )
+
+
   lazy val defaultSettings = resolverSettings ++
+    ignoreWarnings ++
     TestExtras.Filter.settings ++
     Protobuf.settings ++ Seq[Setting[_]](
+      unmanagedSourceDirectories in Compile += {
+        val sourceDir = (sourceDirectory in Compile).value
+        CrossVersion.partialVersion(scalaVersion.value) match {
+          case Some((2, n)) if n >= 13 => sourceDir / "scala-2.13+"
+          case _                       => sourceDir / "scala-2.13-"
+        }
+      },
       // compile options
-      scalacOptions in Compile ++= Seq("-encoding", "UTF-8", "-target:jvm-1.8", "-feature", "-unchecked", "-Xlog-reflective-calls", "-Xlint"),
+      scalacOptions in Compile ++= Seq("-encoding", "UTF-8", "-target:jvm-1.8", "-feature", "-unchecked", "-Xlog-reflective-calls"),
       scalacOptions in Compile ++= (if (allWarnings) Seq("-deprecation") else Nil),
       scalacOptions in Test := (scalacOptions in Test).value.filterNot(opt ⇒
         opt == "-Xlog-reflective-calls" || opt.contains("genjavadoc")),

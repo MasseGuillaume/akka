@@ -4,12 +4,14 @@
 
 package akka.util
 
+import akka.compat._
+
 import java.io.{ ObjectInputStream, ObjectOutputStream }
 import java.nio.{ ByteBuffer, ByteOrder }
 import java.lang.{ Iterable ⇒ JIterable }
 
 import scala.annotation.{ tailrec, varargs }
-import scala.collection.IndexedSeqOptimized
+import scala.collection.StrictOptimizedSeqOps
 import scala.collection.compat._
 import scala.collection.mutable.{ Builder, WrappedArray }
 import scala.collection.immutable
@@ -655,7 +657,8 @@ object ByteString {
  *
  * TODO: Add performance characteristics
  */
-sealed abstract class ByteString extends IndexedSeq[Byte] with IndexedSeqOptimized[Byte, ByteString] {
+sealed abstract class ByteString extends IndexedSeq[Byte] with StrictOptimizedSeqOps[Byte, IndexedSeq, ByteString] {
+
   def apply(idx: Int): Byte
   private[akka] def byteStringCompanion: ByteString.Companion
   // override so that toString will also be `ByteString(...)` for the concrete subclasses
@@ -819,6 +822,10 @@ sealed abstract class ByteString extends IndexedSeq[Byte] with IndexedSeqOptimiz
    * map method that will automatically cast Int back into Byte.
    */
   final def mapI(f: Byte ⇒ Int): ByteString = map(f andThen (_.toByte))
+
+  def map[A](f: Byte ⇒ Byte): ByteString = {
+    ???
+  }
 }
 
 object CompactByteString {
