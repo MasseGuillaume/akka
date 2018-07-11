@@ -89,12 +89,11 @@ object ByteIterator {
       this
     }
 
-    // override
-    final def copyToArray[B >: Byte](xs: Array[B], start: Int, len: Int): Unit = {
-      val n = 0 max ((xs.length - start) min this.len min len)
-      Array.copy(this.array, from, xs, start, n)
-      this.drop(n)
-    }
+    // override final def copyToArray[B >: Byte](xs: Array[B], start: Int, len: Int): Unit = {
+    //   val n = 0 max ((xs.length - start) min this.len min len)
+    //   Array.copy(this.array, from, xs, start, n)
+    //   this.drop(n)
+    // }
 
     final override def toByteString: ByteString = {
       val result =
@@ -200,7 +199,7 @@ object ByteIterator {
 
     final override def len: Int = iterators.foldLeft(0) { _ + _.len }
 
-    final override def length: Int = {
+    final override def size: Int = {
       val result = len
       clear()
       result
@@ -284,21 +283,20 @@ object ByteIterator {
         if (dropMore) dropWhile(p) else this
       } else this
 
-    // override
-    final def copyToArray[B >: Byte](xs: Array[B], start: Int, len: Int): Unit = {
-      var pos = start
-      var rest = len
-      while ((rest > 0) && !iterators.isEmpty) {
-        val n = 0 max ((xs.length - pos) min current.len min rest)
-        current.copyToArray(xs, pos, n)
-        pos += n
-        rest -= n
-        if (current.isEmpty) {
-          dropCurrent()
-        }
-      }
-      normalize()
-    }
+    // override final def copyToArray[B >: Byte](xs: Array[B], start: Int, len: Int): Unit = {
+    //   var pos = start
+    //   var rest = len
+    //   while ((rest > 0) && !iterators.isEmpty) {
+    //     val n = 0 max ((xs.length - pos) min current.len min rest)
+    //     current.copyToArray(xs, pos, n)
+    //     pos += n
+    //     rest -= n
+    //     if (current.isEmpty) {
+    //       dropCurrent()
+    //     }
+    //   }
+    //   normalize()
+    // }
 
     override def foreach[@specialized U](f: Byte ⇒ U): Unit = {
       iterators foreach { _ foreach f }
@@ -439,7 +437,8 @@ abstract class ByteIterator extends BufferedIterator[Byte] {
     (this, that)
   }
 
-  override def indexWhere(p: Byte ⇒ Boolean): Int = {
+  // override
+  def indexWhere(p: Byte ⇒ Boolean): Int = {
     var index = 0
     var found = false
     while (!found && hasNext) if (p(next())) { found = true } else { index += 1 }

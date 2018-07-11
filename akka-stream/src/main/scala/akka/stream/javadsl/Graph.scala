@@ -17,7 +17,7 @@ import akka.stream.scaladsl.{ GenericGraph, GenericGraphWithChangedAttributes }
 import akka.stream.Attributes
 import akka.stream.impl.TraversalBuilder
 
-import scala.collection.parallel.immutable
+// import scala.collection.parallel.immutable
 
 /**
  * Merge several streams, taking elements as they arrive from input streams

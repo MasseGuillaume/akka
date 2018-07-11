@@ -75,10 +75,15 @@ private[persistence] class LocalSnapshotStore(config: Config) extends SnapshotSt
 
   override def deleteAsync(persistenceId: String, criteria: SnapshotSelectionCriteria): Future[Unit] = {
     val metadatas = snapshotMetadatas(persistenceId, criteria)
+    val builder: collection.BuildFrom[Seq[Future[Unit]], Unit, Seq[Unit]] = implicitly
     Future.sequence {
       metadatas.map(deleteAsync)
-    }(collection.breakOut, streamDispatcher).map(_ ⇒ ())(streamDispatcher)
+    }(builder, streamDispatcher).map(_ ⇒ ())(streamDispatcher)
   }
+
+  // def breakOut[From, T, To](implicit b : CanBuildFrom[Nothing, T, To]) =
+  //   new CanBuildFrom[From, T, To] {
+  //     def apply(from: From) = b.apply() ; def apply() = b.apply()
 
   override def receivePluginInternal: Receive = {
     case SaveSnapshotSuccess(metadata) ⇒ saving -= metadata

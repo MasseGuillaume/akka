@@ -122,14 +122,12 @@ object AkkaBuild {
           }
         }
         def log(pos: Position, msg: String, sev: Severity): Unit = {
-          object MyProblem extends Problem {
+          log(new Problem {
             def category: String = "foo"
             def severity: Severity = sev
             def message: String = msg
             def position: Position = pos
-            override def toString = s"$position \n$message"
-          }
-          log(MyProblem)
+          })
         }
         def comment(pos: xsbti.Position, msg: String): Unit = ()
       }

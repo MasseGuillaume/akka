@@ -556,7 +556,7 @@ import scala.collection.immutable.Map.Map1
         val inlets = module.shape.inlets
         if (inlets.isEmpty) Map.empty
         else if (Shape.hasOnePort(inlets)) new Map1(inlets.head, inlets.head.id)
-        else inlets.map(in ⇒ in.asInstanceOf[InPort] → in.id)(collection.breakOut)
+        else inlets.iterator.map(in ⇒ in.asInstanceOf[InPort] → in.id).to(Map)
       }
       CompletedTraversalBuilder(
         traversalSoFar = MaterializeAtomic(module, newOutToSlot),

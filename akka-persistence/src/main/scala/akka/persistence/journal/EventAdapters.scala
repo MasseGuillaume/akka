@@ -147,7 +147,7 @@ private[akka] object EventAdapters {
         case x  ⇒ buf insert (x, ca)
       }
       buf
-    }.to[immutable.Seq]
+    }.to(immutable.Seq)
 
   private final def configToMap(config: Config, path: String): Map[String, String] = {
     import scala.collection.JavaConverters._

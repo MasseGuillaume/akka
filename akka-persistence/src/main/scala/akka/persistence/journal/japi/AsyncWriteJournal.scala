@@ -24,7 +24,7 @@ abstract class AsyncWriteJournal extends AsyncRecovery with SAsyncWriteJournal w
       results.asScala.map { r ⇒
         if (r.isPresent) Failure(r.get)
         else successUnit
-      }(collection.breakOut)
+      }.to(immutable.Seq)
     }
 
   final def asyncDeleteMessagesTo(persistenceId: String, toSequenceNr: Long) =
