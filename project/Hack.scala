@@ -35,7 +35,8 @@ object Hack {
         def problems: Array[Problem] = buffer.toArray
 
         def log(problem: Problem): Unit = {
-          if (problem.severity == Severity.Error) {
+          if (problem.severity == Severity.Error && 
+              !problem.position.sourceFile.toString.contains(".java")) {
             buffer.append(problem)
           }
         }
@@ -55,7 +56,4 @@ object Hack {
       compilerReporter in (Test, compile) := reporter
     )
   }
-  
-  
-  
 }

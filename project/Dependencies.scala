@@ -90,9 +90,9 @@ object Dependencies {
     
     // git clone git@github.com:MasseGuillaume/scala-collection-compat.git
     // cd scala-collection-compat
-    // git checkout proxy
-    // sbt "+ publishLocal"
-    val collectionCompat = "org.scala-lang.modules" %% "scala-collection-compat" % "0.2.1+proxy" // BSD New
+    // git checkout master
+    // sbt "+ compat/publishLocal"
+    val collectionCompat = "org.scala-lang.modules" %% "scala-collection-compat" % "0.1-SNAPSHOT" // BSD New
 
     object Docs {
       // git clone git@github.com:xuwei-k/spray-json.git

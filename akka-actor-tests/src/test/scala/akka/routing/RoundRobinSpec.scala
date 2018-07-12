@@ -53,7 +53,7 @@ class RoundRobinSpec extends AkkaSpec with DefaultTimeout with ImplicitSender {
       val doneLatch = new TestLatch(connectionCount)
 
       val counter = new AtomicInteger
-      var replies = Map.empty[Int, Int].withDefaultValue(0)
+      var replies = Map.empty[Int, Int].withDefaultValue(0).toMap
 
       val actor = system.actorOf(RoundRobinPool(connectionCount).props(routeeProps = Props(new Actor {
         lazy val id = counter.getAndIncrement()
@@ -123,7 +123,7 @@ class RoundRobinSpec extends AkkaSpec with DefaultTimeout with ImplicitSender {
       val iterationCount = 10
       val doneLatch = new TestLatch(connectionCount)
 
-      var replies = Map.empty[String, Int].withDefaultValue(0)
+      var replies = Map.empty[String, Int].withDefaultValue(0).toMap
 
       val paths = (1 to connectionCount) map { n ⇒
         val ref = system.actorOf(Props(new Actor {
@@ -154,7 +154,7 @@ class RoundRobinSpec extends AkkaSpec with DefaultTimeout with ImplicitSender {
       val connectionCount = 10
       val iterationCount = 10
 
-      var replies = Map.empty[String, Int].withDefaultValue(0)
+      var replies = Map.empty[String, Int].withDefaultValue(0).toMap
 
       val actor = system.actorOf(Props(new Actor {
         var n = 0

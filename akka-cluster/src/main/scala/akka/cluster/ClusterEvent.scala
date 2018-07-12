@@ -16,7 +16,7 @@ import akka.dispatch.{ RequiresMessageQueue, UnboundedMessageQueueSemantics }
 import akka.actor.DeadLetterSuppression
 import akka.annotation.{ DoNotInherit, InternalApi }
 
-import scala.collection.breakOut
+
 import scala.runtime.AbstractFunction5
 
 /**
@@ -162,7 +162,7 @@ object ClusterEvent {
     /**
      * All data centers in the cluster
      */
-    def allDataCenters: Set[String] = members.map(_.dataCenter)(breakOut)
+    def allDataCenters: Set[String] = members.iterator.map(_.dataCenter).to(Set)
 
     /**
      * Java API: All data centers in the cluster
@@ -372,10 +372,10 @@ object ClusterEvent {
     else {
       val newGossip = newState.latestGossip
       val oldUnreachableNodes = oldState.dcReachabilityNoOutsideNodes.allUnreachableOrTerminated
-      newState.dcReachabilityNoOutsideNodes.allUnreachableOrTerminated.collect {
+      newState.dcReachabilityNoOutsideNodes.allUnreachableOrTerminated.iterator.collect {
         case node if !oldUnreachableNodes.contains(node) && node != newState.selfUniqueAddress ⇒
           UnreachableMember(newGossip.member(node))
-      }(collection.breakOut)
+      }.to(immutable.Seq)
     }
 
   /**
@@ -385,10 +385,10 @@ object ClusterEvent {
     if (newState eq oldState) Nil
     else {
       val newGossip = newState.latestGossip
-      oldState.dcReachabilityNoOutsideNodes.allUnreachable.collect {
+      oldState.dcReachabilityNoOutsideNodes.allUnreachable.iterator.collect {
         case node if newGossip.hasMember(node) && newState.dcReachabilityNoOutsideNodes.isReachable(node) && node != newState.selfUniqueAddress ⇒
           ReachableMember(newGossip.member(node))
-      }(collection.breakOut)
+      }.to(Seq)
     }
 
   /**
@@ -410,7 +410,7 @@ object ClusterEvent {
     if (newState eq oldState) Nil
     else {
       val otherDcs = (oldState.latestGossip.allDataCenters union newState.latestGossip.allDataCenters) - newState.selfDc
-      otherDcs.filterNot(isReachable(newState, oldState.dcReachability.allUnreachableOrTerminated)).map(UnreachableDataCenter)(collection.breakOut)
+      otherDcs.iterator.filterNot(isReachable(newState, oldState.dcReachability.allUnreachableOrTerminated)).map(UnreachableDataCenter).to(immutable.Seq)
     }
   }
 
@@ -425,7 +425,7 @@ object ClusterEvent {
       val oldUnreachableDcs = otherDcs.filterNot(isReachable(oldState, Set()))
       val currentUnreachableDcs = otherDcs.filterNot(isReachable(newState, Set()))
 
-      (oldUnreachableDcs diff currentUnreachableDcs).map(ReachableDataCenter)(collection.breakOut)
+      (oldUnreachableDcs diff currentUnreachableDcs).iterator.map(ReachableDataCenter).to(immutable.Seq)
     }
   }
 
@@ -443,7 +443,8 @@ object ClusterEvent {
         case (_, newMember :: oldMember :: Nil) if newMember.status != oldMember.status || newMember.upNumber != oldMember.upNumber ⇒
           newMember
       }
-      val memberEvents = (newMembers ++ changedMembers) collect {
+      val allMembers: immutable.Set[Member] = newMembers ++ changedMembers
+      val memberEvents = allMembers collect {
         case m if m.status == Joining  ⇒ MemberJoined(m)
         case m if m.status == WeaklyUp ⇒ MemberWeaklyUp(m)
         case m if m.status == Up       ⇒ MemberUp(m)
@@ -453,7 +454,10 @@ object ClusterEvent {
       }
 
       val removedMembers = oldGossip.members diff newGossip.members
-      val removedEvents = removedMembers.map(m ⇒ MemberRemoved(m.copy(status = Removed), m.status))
+      val removedEvents = {
+        val t: Set[Member] = removedMembers
+        t.map(m ⇒ MemberRemoved(m.copy(status = Removed), m.status))
+      }
 
       (new VectorBuilder[MemberEvent]() ++= removedEvents ++= memberEvents).result()
     }
@@ -563,8 +567,8 @@ private[cluster] final class ClusterDomainEventPublisher extends Actor with Acto
       unreachable = unreachable,
       seenBy = membershipState.latestGossip.seenBy.map(_.address),
       leader = membershipState.leader.map(_.address),
-      roleLeaderMap = membershipState.latestGossip.allRoles.map(r ⇒
-        r → membershipState.roleLeader(r).map(_.address))(collection.breakOut),
+      roleLeaderMap = membershipState.latestGossip.allRoles.iterator.map(r ⇒
+        r → membershipState.roleLeader(r).map(_.address)).to(Map),
       unreachableDataCenters)
     receiver ! state
   }

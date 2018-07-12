@@ -111,7 +111,7 @@ private[akka] class RemoteSystemDaemon(
       }
     }
 
-    val full = Vector() ++ names
+    val full = names.toVector
     rec(full.mkString("/"), 0) match {
       case (Nobody, _) ⇒ Nobody
       case (ref, 0)    ⇒ ref

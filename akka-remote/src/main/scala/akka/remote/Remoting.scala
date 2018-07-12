@@ -716,9 +716,10 @@ private[remote] class EndpointManager(conf: Config, log: LoggingAdapter) extends
       // Shutdown all endpoints and signal to sender() when ready (and whether all endpoints were shut down gracefully)
 
       def shutdownAll[T](resources: TraversableOnce[T])(shutdown: T ⇒ Future[Boolean]): Future[Boolean] = {
-        (Future sequence resources.map(shutdown)) map { _.forall(identity) } recover {
-          case NonFatal(_) ⇒ false
-        }
+        // (Future sequence resources.map(shutdown)) map { _.forall(identity) } recover {
+        //   case NonFatal(_) ⇒ false
+        // }
+        ???
       }
 
       (for {

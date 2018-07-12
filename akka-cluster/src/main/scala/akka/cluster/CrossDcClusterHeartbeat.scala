@@ -11,7 +11,7 @@ import akka.cluster.ClusterSettings.DataCenter
 import akka.remote.FailureDetectorRegistry
 import akka.util.ConstantFun
 
-import scala.collection.{ SortedSet, breakOut }
+import scala.collection.SortedSet
 
 /**
  * INTERNAL API
@@ -267,7 +267,7 @@ private[cluster] final case class CrossDcHeartbeatingState(
   /** Lists addresses that this node should send heartbeats to */
   val activeReceivers: Set[UniqueAddress] = {
     val otherDcs = state.filter(_._1 != selfDataCenter)
-    val allOtherNodes = otherDcs.values
+    val allOtherNodes: Int = otherDcs.values
 
     allOtherNodes.flatMap(
       _.take(nrOfMonitoredNodesPerDc)
