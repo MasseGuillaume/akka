@@ -16,6 +16,7 @@ import scala.collection.immutable.{ IndexedSeq, VectorBuilder }
 import scala.collection.generic.CanBuildFrom
 import scala.reflect.ClassTag
 import java.nio.charset.{ Charset, StandardCharsets }
+import scala.collection.compat._
 
 object ByteString {
 
@@ -143,9 +144,9 @@ object ByteString {
   /** Java API */
   def createBuilder: ByteStringBuilder = new ByteStringBuilder
 
-  implicit val canBuildFrom: CanBuildFrom[TraversableOnce[Byte], Byte, ByteString] =
-    new CanBuildFrom[TraversableOnce[Byte], Byte, ByteString] {
-      def apply(ignore: TraversableOnce[Byte]): ByteStringBuilder = newBuilder
+  implicit val canBuildFrom: CanBuildFrom[IterableOnce[Byte], Byte, ByteString] =
+    new CanBuildFrom[IterableOnce[Byte], Byte, ByteString] {
+      def apply(ignore: IterableOnce[Byte]): ByteStringBuilder = newBuilder
       def apply(): ByteStringBuilder = newBuilder
     }
 
@@ -382,7 +383,7 @@ object ByteString {
   }
 
   private[akka] object ByteStrings extends Companion {
-    def apply(bytestrings: Vector[ByteString1]): ByteString = new ByteStrings(bytestrings, (0 /: bytestrings)(_ + _.length))
+    def apply(bytestrings: Vector[ByteString1]): ByteString = new ByteStrings(bytestrings, bytestrings.foldLeft(0)(_ + _.length))
 
     def apply(bytestrings: Vector[ByteString1], length: Int): ByteString = new ByteStrings(bytestrings, length)
 
@@ -844,7 +845,7 @@ object CompactByteString {
    */
   def apply[T](bytes: T*)(implicit num: Integral[T]): CompactByteString = {
     if (bytes.isEmpty) empty
-    else ByteString.ByteString1C(bytes.map(x ⇒ num.toInt(x).toByte)(collection.breakOut))
+    else ByteString.ByteString1C(bytes.iterator.map(x ⇒ num.toInt(x).toByte).to(scala.Array))
   }
 
   /**
@@ -977,7 +978,7 @@ final class ByteStringBuilder extends Builder[Byte, ByteString] {
     this
   }
 
-  override def ++=(xs: TraversableOnce[Byte]): this.type = {
+  override def ++=(xs: IterableOnce[Byte]): this.type = {
     xs match {
       case b: ByteString if b.isEmpty ⇒
       // do nothing

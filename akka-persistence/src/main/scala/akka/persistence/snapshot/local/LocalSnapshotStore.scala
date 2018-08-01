@@ -20,6 +20,7 @@ import scala.collection.immutable
 import scala.concurrent.Future
 import scala.util._
 import java.nio.file.Files
+import scala.collection.compat._
 
 /**
  * INTERNAL API
@@ -77,7 +78,7 @@ private[persistence] class LocalSnapshotStore(config: Config) extends SnapshotSt
     val metadatas = snapshotMetadatas(persistenceId, criteria)
     Future.sequence {
       metadatas.map(deleteAsync)
-    }(collection.breakOut, streamDispatcher).map(_ ⇒ ())(streamDispatcher)
+    }(scala.collection.immutable.IndexedSeq, streamDispatcher).map(_ ⇒ ())(streamDispatcher)
   }
 
   override def receivePluginInternal: Receive = {
