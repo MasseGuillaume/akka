@@ -37,14 +37,14 @@ class CamelMessage(val body: Any, val headers: Map[String, Any], val attachments
    * The returned headers map is backed up by an immutable headers map. Any attempt to modify
    * the returned map will throw an exception.
    */
-  def getHeaders(names: JSet[String]): JMap[String, Any] = headers(names.asScala.toSet)
+  def getHeaders(names: JSet[String]): JMap[String, Any] = headers(names.asScala.toSet).asJava
 
   /**
    * Java API: Returns all headers from this message. The returned headers map is backed up by this
    * message's immutable headers map. Any attempt to modify the returned map will throw an
    * exception.
    */
-  def getHeaders: JMap[String, Any] = headers
+  def getHeaders: JMap[String, Any] = headers.asJava
 
   /**
    * Java API: Creates a new CamelMessage with given <code>headers</code>. A copy of the headers map is made.
@@ -145,14 +145,14 @@ class CamelMessage(val body: Any, val headers: Map[String, Any], val attachments
    * The returned headers map is backed up by an immutable headers map. Any attempt to modify
    * the returned map will throw an exception.
    */
-  def getAttachments(names: JSet[String]): JMap[String, DataHandler] = attachments(names.asScala.toSet)
+  def getAttachments(names: JSet[String]): JMap[String, DataHandler] = attachments(names.asScala.toSet).asJava
 
   /**
    * Java API: Returns all attachments from this message. The returned attachments map is backed up by this
    * message's immutable headers map. Any attempt to modify the returned map will throw an
    * exception.
    */
-  def getAttachments: JMap[String, DataHandler] = attachments
+  def getAttachments: JMap[String, DataHandler] = attachments.asJava
 
   /**
    * Java API: Creates a new CamelMessage with given <code>attachments</code>. A copy of the attachments map is made.
