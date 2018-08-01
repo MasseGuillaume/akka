@@ -92,7 +92,7 @@ object AkkaBuild {
 
   lazy val scalafixSettings = Seq(
     scalacOptions += "-Yrangepos",
-    scalafixDepedencies += "org.scala-lang.modules" % "scala-collection-migrations" % "0.3.0"
+    scalafixDepedencies += "org.scala-lang.modules" % "scala-collection-migrations" % Dependencies.collectionCompatVersion
   )
 
   lazy val defaultSettings = scalafixSettings ++ resolverSettings ++
